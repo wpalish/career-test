@@ -33,7 +33,7 @@
     'Анализируем ваши ответы…',
     'Считаем баллы по четырём шкалам…',
     'Определяем тип личности…',
-    'Подбираем подходящие профессии…',
+    'Подбираем профессии из базы 200+…',
   ];
 
   const LOADING_DURATION = 2600;
@@ -245,16 +245,117 @@
     fillTags('result-strengths', data.strengths);
     fillTags('result-weaknesses', data.weaknesses);
 
-    const profs = document.getElementById('result-professions');
-    profs.innerHTML = '';
-    data.professions.forEach((p) => {
-      const li = document.createElement('li');
-      li.innerHTML = `<span class="prof__title">${p.title}</span><span class="prof__why">${p.why}</span>`;
-      profs.appendChild(li);
-    });
+    renderProfessions(code);
 
     el.restart.textContent = state.sharedLanding ? 'Пройти тест самому' : 'Пройти заново';
     state.lastResult = { code, name: data.name, icon: data.icon, axes };
+  }
+
+  // ─────────── Алгоритм подбора профессий из базы 200+ ───────────
+  /**
+   * Для кода пользователя (например, 'INTJ'):
+   *   1. Отбираем все профессии, где mbti включает код с позицией 0 или 1
+   *      (primary и secondary мэтчи — самые точные попадания).
+   *   2. Сортируем по позиции кода в mbti (mbti[0] = primary, mbti[1] = secondary).
+   *   3. Первые 3 → «Топ-3 идеальных».
+   *   4. Остальные группируем по sphere, в каждой сфере оставляем максимум 5 —
+   *      так пользователь видит богатый, но не перегруженный выбор.
+   *
+   * В базе 203 профессии, каждый из 16 типов имеет ≥12 primary/secondary матчей.
+   */
+  const MAX_ALT_PER_SPHERE = 5;
+
+  function pickProfessions(code) {
+    const matches = (typeof PROFESSIONS !== 'undefined' ? PROFESSIONS : [])
+      .map((p) => {
+        const idx = p.mbti.indexOf(code);
+        return idx === -1 ? null : { ...p, matchRank: idx };
+      })
+      .filter(Boolean)
+      .filter((p) => p.matchRank <= 1) // только primary (0) и secondary (1) мэтчи
+      .sort((a, b) => a.matchRank - b.matchRank);
+
+    const top3 = matches.slice(0, 3);
+    const rest = matches.slice(3);
+
+    // Группируем по сфере, ограничиваем MAX_ALT_PER_SPHERE на сферу
+    const bySphere = {};
+    const restCapped = [];
+    rest.forEach((p) => {
+      if (!bySphere[p.sphere]) bySphere[p.sphere] = [];
+      if (bySphere[p.sphere].length < MAX_ALT_PER_SPHERE) {
+        bySphere[p.sphere].push(p);
+        restCapped.push(p);
+      }
+    });
+    return { top3, rest: restCapped, bySphere };
+  }
+
+  function renderProfessions(code) {
+    const { top3, bySphere } = pickProfessions(code);
+
+    // ── Топ-3 ──
+    const top3ol = document.getElementById('result-top3');
+    top3ol.innerHTML = '';
+    top3.forEach((p) => {
+      const li = document.createElement('li');
+      li.className = 'top3__item';
+      const sphere = SPHERES[p.sphere] || {};
+      li.innerHTML = `
+        <div class="top3__head">
+          <span class="top3__sphere" aria-hidden="true">${sphere.icon || '•'}</span>
+          <span class="top3__title">${p.title}</span>
+          <span class="top3__chip">${sphere.label || p.sphere}</span>
+        </div>
+        <p class="top3__why">${p.why}</p>`;
+      top3ol.appendChild(li);
+    });
+
+    // ── Альтернативы по сферам (аккордеон) ──
+    const spheresBox = document.getElementById('result-spheres');
+    spheresBox.innerHTML = '';
+
+    // Сортируем сферы по числу профессий (от большего к меньшему) —
+    // так пользователь сразу видит самые «плотные» сферы сверху.
+    const orderedSpheres = Object.keys(bySphere).sort((a, b) => bySphere[b].length - bySphere[a].length);
+
+    if (orderedSpheres.length === 0) {
+      spheresBox.innerHTML = '<p class="spheres__empty">Для вашего типа не нашлось дополнительных профессий.</p>';
+      return;
+    }
+
+    orderedSpheres.forEach((sphereKey, idx) => {
+      const sphere = SPHERES[sphereKey] || { label: sphereKey, icon: '•', accent: 'var(--accent)' };
+      const items = bySphere[sphereKey];
+
+      const details = document.createElement('details');
+      details.className = 'sphere';
+      // Первая (самая плотная) сфера раскрыта по умолчанию
+      if (idx === 0) details.open = true;
+      details.style.setProperty('--sphere-accent', sphere.accent || 'var(--accent)');
+
+      const summary = document.createElement('summary');
+      summary.className = 'sphere__head';
+      summary.innerHTML = `
+        <span class="sphere__icon" aria-hidden="true">${sphere.icon}</span>
+        <span class="sphere__name">${sphere.label}</span>
+        <span class="sphere__count">${items.length}</span>
+        <svg class="sphere__chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`;
+      details.appendChild(summary);
+
+      const body = document.createElement('div');
+      body.className = 'sphere__body';
+      items.forEach((p) => {
+        const card = document.createElement('div');
+        card.className = 'altprof';
+        card.innerHTML = `
+          <div class="altprof__title">${p.title}</div>
+          <div class="altprof__why">${p.why}</div>`;
+        body.appendChild(card);
+      });
+      details.appendChild(body);
+      spheresBox.appendChild(details);
+    });
   }
 
   function renderAxes(axes) {

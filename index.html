@@ -33,13 +33,13 @@
         </h1>
         <p class="welcome__lead">
           48 коротких утверждений — и алгоритм определит твой тип личности,
-          сильные стороны и <strong>топ-5 профессий</strong>, которые подходят именно тебе.
+          сильные стороны и <strong>200+ профессий</strong>, которые подходят именно тебе.
         </p>
 
         <ul class="welcome__facts" aria-hidden="true">
           <li><b>48</b><span>вопросов</span></li>
           <li><b>16</b><span>типов</span></li>
-          <li><b>5</b><span>профессий</span></li>
+          <li><b>200+</b><span>профессий</span></li>
         </ul>
 
         <button class="btn btn--primary btn--lg" id="btn-start" type="button">
@@ -111,9 +111,18 @@
           <p class="result__decisions" id="result-decisions"></p>
         </div>
 
+        <!-- ─── Топ-3 идеальных профессий ─── -->
+        <div class="result__panel result__panel--wide result__panel--hero">
+          <h3 class="result__h">Ваше идеальное попадание · Топ-3</h3>
+          <p class="result__hint">Самые точные профессии для вашего типа личности.</p>
+          <ol class="top3" id="result-top3"></ol>
+        </div>
+
+        <!-- ─── Альтернативы по сферам (аккордеон) ─── -->
         <div class="result__panel result__panel--wide">
-          <h3 class="result__h">Топ-5 профессий для вас</h3>
-          <ol class="proflist" id="result-professions"></ol>
+          <h3 class="result__h">Отличные альтернативы по сферам</h3>
+          <p class="result__hint">Раскройте интересующую сферу — внутри от 1 до нескольких профессий, которые тоже подходят вашему типу.</p>
+          <div class="spheres" id="result-spheres" role="region" aria-label="Альтернативные профессии по сферам"></div>
         </div>
 
         <div class="result__actions">
@@ -135,6 +144,7 @@
 
   <script src="questions.js"></script>
   <script src="results.js"></script>
+  <script src="professions.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
