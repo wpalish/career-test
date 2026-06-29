@@ -1,0 +1,10 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Local preview / tooling config
+.claude/
+
+# Dependencies (проект без сборки, но на всякий случай)
+node_modules/

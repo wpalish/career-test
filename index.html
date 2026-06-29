@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#5b4bff" />
+  <meta name="description" content="Пройди тест за 15 минут и узнай свой тип личности и профессии, которые подходят именно тебе." />
+  <title>Кем тебе быть? — тест на профессию по типу личности</title>
+
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <!-- Атмосферный фон: мягкие движущиеся пятна света -->
+  <div class="aurora" aria-hidden="true">
+    <span class="aurora__blob aurora__blob--1"></span>
+    <span class="aurora__blob aurora__blob--2"></span>
+    <span class="aurora__blob aurora__blob--3"></span>
+  </div>
+
+  <main class="app" id="app">
+
+    <!-- ───────────── Экран 1: Приветствие ───────────── -->
+    <section class="screen screen--welcome is-active" id="screen-welcome" aria-labelledby="welcome-title">
+      <div class="welcome">
+        <span class="eyebrow">Тест личности · ~15 минут</span>
+        <h1 class="welcome__title" id="welcome-title">
+          Узнай свою<br /><span class="grad-text">идеальную профессию</span>
+        </h1>
+        <p class="welcome__lead">
+          48 коротких утверждений — и алгоритм определит твой тип личности,
+          сильные стороны и <strong>топ-5 профессий</strong>, которые подходят именно тебе.
+        </p>
+
+        <ul class="welcome__facts" aria-hidden="true">
+          <li><b>48</b><span>вопросов</span></li>
+          <li><b>16</b><span>типов</span></li>
+          <li><b>5</b><span>профессий</span></li>
+        </ul>
+
+        <button class="btn btn--primary btn--lg" id="btn-start" type="button">
+          Начать тест
+          <svg class="btn__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </button>
+        <p class="welcome__note">Бесплатно · без регистрации · результат сразу</p>
+      </div>
+    </section>
+
+    <!-- ───────────── Экран 2: Тестирование ───────────── -->
+    <section class="screen screen--quiz" id="screen-quiz" aria-labelledby="quiz-question" hidden>
+      <header class="quiz__top">
+        <button class="iconbtn" id="btn-back" type="button" aria-label="Предыдущий вопрос">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+        </button>
+        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="48" aria-valuenow="0" aria-label="Прогресс теста">
+          <div class="progress__bar" id="progress-bar"></div>
+        </div>
+        <span class="progress__count" id="progress-count">1&nbsp;/&nbsp;48</span>
+      </header>
+
+      <div class="quiz__body">
+        <p class="quiz__dimension" id="quiz-dimension">Шкала</p>
+        <h2 class="quiz__question" id="quiz-question">Вопрос</h2>
+      </div>
+
+      <div class="quiz__answers" id="quiz-answers" role="group" aria-labelledby="quiz-question">
+        <!-- Кнопки ответов генерируются в app.js -->
+      </div>
+    </section>
+
+    <!-- ───────────── Экран 3: Загрузка / интрига ───────────── -->
+    <section class="screen screen--loading" id="screen-loading" aria-live="polite" hidden>
+      <div class="loader">
+        <div class="loader__ring">
+          <span></span><span></span><span></span>
+        </div>
+        <p class="loader__text" id="loader-text">Анализируем ваши ответы…</p>
+      </div>
+    </section>
+
+    <!-- ───────────── Экран 4: Результат ───────────── -->
+    <section class="screen screen--result" id="screen-result" aria-labelledby="result-name" hidden>
+      <article class="result" id="result-card">
+        <header class="result__head">
+          <div class="result__badge" id="result-badge" aria-hidden="true">🧩</div>
+          <span class="result__code" id="result-code">INTJ</span>
+          <h2 class="result__name" id="result-name">Тип</h2>
+          <p class="result__archetype" id="result-archetype">Архетип</p>
+          <p class="result__summary" id="result-summary">Описание</p>
+        </header>
+
+        <section class="result__axes" id="result-axes" aria-label="Ваш профиль по четырём шкалам"></section>
+
+        <div class="result__grid">
+          <div class="result__panel">
+            <h3 class="result__h">Сильные стороны</h3>
+            <ul class="taglist" id="result-strengths"></ul>
+          </div>
+          <div class="result__panel">
+            <h3 class="result__h">Зоны роста</h3>
+            <ul class="taglist taglist--soft" id="result-weaknesses"></ul>
+          </div>
+        </div>
+
+        <div class="result__panel result__panel--wide">
+          <h3 class="result__h">Как вы принимаете решения</h3>
+          <p class="result__decisions" id="result-decisions"></p>
+        </div>
+
+        <div class="result__panel result__panel--wide">
+          <h3 class="result__h">Топ-5 профессий для вас</h3>
+          <ol class="proflist" id="result-professions"></ol>
+        </div>
+
+        <div class="result__actions">
+          <button class="btn btn--primary" id="btn-share" type="button">
+            <svg class="btn__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 6l-4-4-4 4M12 2v13" /><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" /></svg>
+            Поделиться
+          </button>
+          <button class="btn btn--ghost" id="btn-image" type="button">
+            <svg class="btn__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 11l4 4 4-4" /><path d="M5 21h14" /></svg>
+            Картинка
+          </button>
+          <button class="btn btn--ghost" id="btn-restart" type="button">Пройти заново</button>
+        </div>
+        <p class="result__toast" id="share-toast" role="status" hidden>Ссылка скопирована в буфер обмена ✓</p>
+      </article>
+    </section>
+
+  </main>
+
+  <script src="questions.js"></script>
+  <script src="results.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
